@@ -957,7 +957,7 @@ function updateMovement(deltaSec) {
 
   // Tốc độ di chuyển phụ thuộc vào loại súng đang cầm và trạng thái ngắm ADS (chuẩn Valorant)
   const adsSlowdown = isADS ? 0.76 : 1.0;
-  const accel = currentWeapon.moveSpeed * 14 * adsSlowdown;
+  const accel = currentWeapon.moveSpeed * 18 * adsSlowdown;
 
   if (moveDir.lengthSq() > 0) {
     moveDir.normalize();
