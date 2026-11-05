@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VALORANT // AIM LAB ULTIMATE 144Hz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- 1. BẢNG TELEMETRY FPS & FRAME TIME (Góc trái trên) -->
+    <div id="telemetry-panel">
+      <div class="telemetry-header">
+        <span class="dot-live"></span> VALORANT ENGINE // 144Hz+
+      </div>
+      <div class="telemetry-grid">
+        <div class="stat-box">
+          <span class="stat-label">CLIENT FPS</span>
+          <span id="fps-val" class="stat-value cyan">--</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">FRAME TIME</span>
+          <span class="stat-value red"><span id="ft-val">--</span><small>ms</small></span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">1% LOW</span>
+          <span id="low-fps-val" class="stat-value yellow">--</span>
+        </div>
+      </div>
+      <canvas id="frametime-graph" width="230" height="36"></canvas>
+      <div id="hz-badge" class="hz-badge">RAW INPUT ACTIVE // 144Hz</div>
+    </div>
+
+    <!-- 2. THANH CHỌN PHÒNG TẬP (ARENA SELECTOR - Chính giữa trên) -->
+    <div id="arena-bar">
+      <div class="arena-tabs">
+        <button class="arena-tab active" data-room="range">[F1] PHÒNG CƠ BẢN</button>
+        <button class="arena-tab" data-room="reflex">[F2] PHÒNG PHẢN XẠ</button>
+        <button class="arena-tab" data-room="obstacle">[F3] PHÒNG VẬT CẢN</button>
+        <button class="arena-tab combat" data-room="combat">[F4] ĐẤU BOT BẮN TRẢ</button>
+      </div>
+      <!-- Thanh hiển thị Level khi ở Phòng 4 (Đấu Bot) -->
+      <div id="combat-level-bar" class="combat-level-bar hidden">
+        <span id="level-title">LEVEL 1 // IRON BOT</span>
+        <div class="boss-hp-track">
+          <div id="boss-hp-fill" class="boss-hp-fill"></div>
+        </div>
+        <span id="level-keys">Bấm <b>[G]</b> Tăng Level | <b>[H]</b> Hồi đầy máu</span>
+      </div>
+    </div>
+
+    <!-- 3. BẢNG THỐNG KÊ CHIẾN TÍCH (Góc phải trên) -->
+    <div id="combat-hud">
+      <div class="combat-item">
+        <span class="c-label">KILLS</span>
+        <span id="kill-count" class="c-val">0</span>
+      </div>
+      <div class="combat-item">
+        <span class="c-label">HEADSHOT</span>
+        <span id="hs-rate" class="c-val cyan">100%</span>
+      </div>
+      <div class="combat-item">
+        <span class="c-label">ACCURACY</span>
+        <span id="acc-rate" class="c-val">100%</span>
+      </div>
+      <div class="combat-item">
+        <span class="c-label">REACTION</span>
+        <span id="reaction-time" class="c-val yellow">--<small>ms</small></span>
+      </div>
+    </div>
+
+    <!-- 4. GIAO DIỆN ỐNG NGẮM SNIPER SCOPE (Khi bật ngắm Operator) -->
+    <div id="sniper-scope" class="hidden">
+      <div class="scope-circle"></div>
+      <div class="scope-line-h"></div>
+      <div class="scope-line-v"></div>
+      <div class="scope-red-dot"></div>
+    </div>
+
+    <!-- 5. HIỆU ỨNG TRÚNG ĐẠN ĐỎ MÀN HÌNH -->
+    <div id="damage-vignette"></div>
+
+    <!-- 6. TÂM NGẮM & HITMARKER -->
+    <div id="crosshair-container">
+      <div class="ch-line ch-top"></div>
+      <div class="ch-line ch-bottom"></div>
+      <div class="ch-line ch-left"></div>
+      <div class="ch-line ch-right"></div>
+      <div class="ch-dot"></div>
+      <div id="hitmarker" class="hitmarker hidden">
+        <div class="hm-diag hm-1"></div>
+        <div class="hm-diag hm-2"></div>
+      </div>
+    </div>
+
+    <!-- 7. BANNER THÔNG BÁO GIỮA MÀN HÌNH -->
+    <div id="kill-banner" class="kill-banner hidden">
+      <div class="banner-skull">☠</div>
+      <div id="banner-text" class="banner-text">HEADSHOT</div>
+    </div>
+
+    <!-- 8. THANH MÁU NGƯỜI CHƠI (Góc trái dưới) -->
+    <div id="player-vitals">
+      <div class="vital-box">
+        <span class="vital-label">SHIELD</span>
+        <span id="player-shield" class="vital-num cyan">50</span>
+      </div>
+      <div class="vital-box main-hp">
+        <span class="vital-label">HEALTH</span>
+        <span id="player-hp" class="vital-num">100</span>
+      </div>
+    </div>
+
+    <!-- 9. KHO VŨ KHÍ & ĐẠN DƯỢC (Góc phải dưới) -->
+    <div id="weapon-hud">
+      <div class="ammo-box">
+        <span id="ammo-curr" class="ammo-curr">25</span>
+        <span class="ammo-sep">/</span>
+        <span id="ammo-max" class="ammo-max">25</span>
+        <div id="ads-indicator" class="ads-tag">HIPFIRE</div>
+      </div>
+      <div class="weapon-slots">
+        <div class="w-slot active" data-wep="vandal">[1] VANDAL</div>
+        <div class="w-slot" data-wep="phantom">[2] PHANTOM</div>
+        <div class="w-slot" data-wep="operator">[3] OPERATOR</div>
+        <div class="w-slot" data-wep="sheriff">[4] SHERIFF</div>
+        <div class="w-slot" data-wep="spectre">[5] SPECTRE</div>
+      </div>
+    </div>
+
+    <!-- 10. HƯỚNG DẪN PHÍM TẮT DƯỚI ĐÁY -->
+    <div id="controls-hint">
+      <span><b>GIỮ CHUỘT TRÁI</b>: Sấy / Tap</span>
+      <span><b>CHUỘT PHẢI</b>: Bật/Tắt Ngắm</span>
+      <span><b>1 - 5</b>: Đổi Súng</span>
+      <span><b>R</b>: Nạp Đạn</span>
+      <span><b>F1 - F4</b>: Đổi Phòng</span>
+      <span><b>ESC</b>: Chỉnh Sens</span>
+    </div>
+
+    <!-- 11. MENU CÀI ĐẶT SENSITIVITY (ESC) -->
+    <div id="settings-modal" class="hidden">
+      <div class="settings-card">
+        <div class="modal-header">
+          <h2>SETTINGS // SENSITIVITY & ARENA</h2>
+          <span class="esc-tag">ESC HOẶC CLICK ĐỂ TIẾP TỤC</span>
+        </div>
+
+        <div class="setting-group">
+          <label>VALORANT SENSITIVITY</label>
+          <div class="input-row">
+            <input type="number" id="sens-input" step="0.01" min="0.01" max="5.0" value="0.35" />
+            <input type="range" id="sens-slider" min="0.05" max="1.5" step="0.01" value="0.35" />
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>MOUSE DPI</label>
+          <div class="input-row">
+            <select id="dpi-select">
+              <option value="400">400 DPI</option>
+              <option value="800" selected>800 DPI</option>
+              <option value="1200">1200 DPI</option>
+              <option value="1600">1600 DPI</option>
+              <option value="3200">3200 DPI</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="calc-results">
+          <div class="calc-box">
+            <span class="calc-title">eDPI (Sens × DPI)</span>
+            <span id="edpi-val" class="calc-num">280</span>
+          </div>
+          <div class="calc-box">
+            <span class="calc-title">QUÃNG ĐƯỜNG (cm / 360°)</span>
+            <span id="cm360-val" class="calc-num cyan">46.5 cm</span>
+          </div>
+        </div>
+
+        <button id="btn-resume" class="valorant-btn w-full">QUAY LẠI CHIẾN ĐẤU</button>
+      </div>
+    </div>
+
+    <!-- 12. SẢNH CHỜ KHỞI ĐỘNG -->
+    <div id="lobby-overlay">
+      <div class="lobby-card">
+        <div class="brand-tag">VALORANT TACTICAL AIM SUITE // 144Hz+</div>
+        <h1 class="lobby-title">AIM LAB <span>ULTIMATE</span></h1>
+        <p class="lobby-desc">
+          Hệ thống <strong>5 Vũ khí (Vandal, Phantom, Operator, Sheriff, Spectre)</strong> hỗ trợ sấy liên thanh & bật/tắt ống ngắm.<br/>
+          <strong>4 Phòng tập chuyên biệt</strong> từ luyện phản xạ Hard Bot đến đấu súng sinh tồn với Boss AI Level 5.
+        </p>
+
+        <div class="feature-badges">
+          <span>🔫 Sấy Recoil & Tap</span>
+          <span>🔭 Bật/Tắt Ngắm ADS & Scope</span>
+          <span>🧱 Phòng Vật Cản & Peek</span>
+          <span>🤖 Bot Bắn Trả 5 Level</span>
+        </div>
+
+        <button id="btn-enter-range" class="valorant-btn">
+          BẮT ĐẦU HUẤN LUYỆN (CLICK)
+        </button>
+      </div>
+    </div>
+
+    <!-- 13. CANVAS 3D -->
+    <canvas id="game-canvas"></canvas>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
