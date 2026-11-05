@@ -8,9 +8,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
-    <!-- Đường dẫn chuẩn Vite -->
-    <script type="module" crossorigin src="/assets/index-CfV8vJMG.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DZmA6Ou-.css">
+    
+    <!-- Tự động nạp Three.js kể cả khi chạy trực tiếp từ nhánh main -->
+
+
+    <!-- Đường dẫn tương đối chạy được trên mọi nhánh GitHub Pages -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+        }
+      }
+    </script>
+    <script type="module" crossorigin src="./assets/index-CfV8vJMG.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DZmA6Ou-.css">
   </head>
   <body>
     <!-- 1. BẢNG TELEMETRY FPS & FRAME TIME (Góc trái trên) -->
@@ -73,7 +84,7 @@
       </div>
     </div>
 
-    <!-- 4. GIAO DIỆN ỐNG NGẮM SNIPER SCOPE (Khi bật ngắm Operator) -->
+    <!-- 4. GIAO DIỆN ỐNG NGẮM SNIPER SCOPE -->
     <div id="sniper-scope" class="hidden">
       <div class="scope-circle"></div>
       <div class="scope-line-h"></div>
@@ -212,6 +223,6 @@
     <!-- 13. CANVAS 3D RENDER -->
     <canvas id="game-canvas"></canvas>
 
-    <!-- Script chính -->
+    <!-- Đường dẫn tương đối chạy được trên mọi nhánh GitHub Pages -->
   </body>
 </html>
